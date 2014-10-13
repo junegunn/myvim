@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# https://github.com/junegunn/myvim
+
+set -u
+set -e
+
+OUTPUT=${1:-vim.$(whoami)}
+
+get_md5() {
+  if which md5sum > /dev/null 2>&1; then
+    md5sum "$1" | awk '{print $1}'
+  else
+    md5 -q "$1"
+  fi
+}
+
+generate() {
+  MD5=$(get_md5 "$1")
+  MD5=${MD5:0:8}
+  TEMPLATE='#!/usr/bin/env bash
+
+set -u
+set -e
+
+MYVIM=/tmp/myvim
+BASE=$MYVIM/'$MD5'
+
+ren() {
+  >&2 echo "Renaming $1 to $2"
+  mv "$1" "$2"
+}
+
+if [ ! -d $BASE/.vim ]; then
+  >&2 echo "Extracting Vim environment to $BASE"
+  mkdir -p $BASE
+  sed "1,/^# EOF #$/d" "$0" | tar -C $BASE -xj
+fi
+
+mkdir -p $BASE/myvim-pids
+touch $BASE/myvim-pids/$$
+
+SOURCE=$(readlink ~/.vim) || SOURCE=""
+if [ -e ~/.vim -a "$SOURCE" != $BASE/.vim ]; then
+  if [[ "$SOURCE" =~ ^$MYVIM ]]; then
+    MD5=$(basename $(dirname "$SOURCE"))
+    >&2 echo ".vim is currently linked to different bundle: $SOURCE"
+    >&2 echo "To clean up:"
+    >&2 echo "  rm ~/.vim; mv ~/.vim.$MD5 ~/.vim"
+    exit 1
+  fi
+  ren ~/.vim ~/.vim.'$MD5'
+fi
+ln -sf $BASE/.vim ~/.vim
+
+vim -Nu $BASE/.vimrc "$@"
+STATUS=$?
+
+rm -f $BASE/myvim-pids/$$
+if [ -e ~/.vim -a "$(readlink ~/.vim)" = $BASE/.vim ]; then
+  CNT=0
+  shopt -s nullglob
+  for pid in $BASE/myvim-pids/*; do
+    if ps $(basename $pid) > /dev/null; then
+      CNT=$(( CNT + 1 ))
+    else
+      rm -f $pid
+    fi
+  done
+
+  if [ $CNT -eq 0 ]; then
+    rm ~/.vim
+    [ -e ~/.vim.'$MD5' ] && ren ~/.vim.'$MD5' ~/.vim
+  fi
+fi
+
+exit $STATUS
+# EOF #'
+  echo "$TEMPLATE" > "$OUTPUT"
+  cat "$1" >> "$OUTPUT"
+  chmod +x "$OUTPUT"
+  echo "Created $OUTPUT executable"
+}
+
+TEMP=/tmp/myvim.tgz
+tar -C ~ -h --exclude .git --exclude .hg --exclude .svn -cjf $TEMP .vim .vimrc
+generate $TEMP
+rm -f $TEMP
+
