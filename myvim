@@ -81,7 +81,7 @@ exit $STATUS
   echo "Created $OUTPUT executable"
 }
 
-TEMP=/tmp/myvim.tgz
+TEMP=/tmp/myvim.tbz
 tar -C ~ -h --exclude .git --exclude .hg --exclude .svn -cjf $TEMP .vim .vimrc
 generate $TEMP
 rm -f $TEMP
