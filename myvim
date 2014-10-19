@@ -18,6 +18,7 @@ generate() {
   MD5=$(get_md5 "$1")
   MD5=${MD5:0:8}
   TEMPLATE='#!/usr/bin/env bash
+# Created at: '$(date)'
 
 set -u
 set -e
