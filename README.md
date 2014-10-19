@@ -15,10 +15,11 @@ curl -L https://raw.githubusercontent.com/junegunn/myvim/master/myvim | bash
 Why?
 ----
 
-Having your .vimrc on GitHub or Bitbucket is usually not enough. Because:
+You want to have the same Vim environment on whichever server you connect to.
+But having your .vimrc on GitHub or Bitbucket is usually not enough. Because:
 
-- Installing plugins can be time-consuming
-- Firewall may disallow access to public network
+- You need Git and free access to public network to install plugins from GitHub
+- Even when both conditions are met, installing plugins can be time-consuming
 - You don't want to impose your personal preferences on others when using
   shared accounts on servers
 
