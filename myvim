@@ -82,6 +82,15 @@ exit $STATUS
   echo "Created $OUTPUT executable"
 }
 
+if [ ! -e ~/.vimrc ]; then
+  >&2 echo "~/.vimrc is not found"
+  exit 1
+fi
+
+if [ ! -e ~/.vim ]; then
+  mkdir -p ~/.vim
+fi
+
 TEMP=/tmp/myvim.tbz
 tar -C ~ -h --exclude .git --exclude .hg --exclude .svn -cjf $TEMP .vim .vimrc
 generate $TEMP
