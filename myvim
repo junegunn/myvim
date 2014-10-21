@@ -53,7 +53,7 @@ if [ -e ~/.vim -a "$SOURCE" != $BASE/.vim ]; then
 fi
 ln -sf $BASE/.vim ~/.vim
 
-vim -Nu $BASE/.vimrc "$@"
+\vim -Nu $BASE/.vimrc "$@"
 STATUS=$?
 
 rm -f $BASE/myvim-pids/$$
