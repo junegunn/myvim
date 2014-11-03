@@ -4,7 +4,17 @@
 set -u
 set -e
 
-OUTPUT=${1:-vim.$(whoami)}
+EDIT=0
+OUTPUT=vim.$(whoami)
+
+while [ $# -gt 0 ]; do
+  case $1 in
+    -e|--edit) EDIT=1 ;;
+    -*) echo "$0: Unrecognized option $1"; exit 1 ;;
+    *) OUTPUT=$1 ;;
+  esac
+  shift
+done
 
 get_md5() {
   if which md5sum > /dev/null 2>&1; then
@@ -15,11 +25,27 @@ get_md5() {
 }
 
 generate() {
+  USER_CONFIG=""
+  if [ $EDIT -eq 1 ]; then
+    CONFIG_FILE="$OUTPUT.config.sh"
+    echo "# Place your environment variables here" > "$CONFIG_FILE"
+    if NAME=$(git config user.name 2> /dev/null) && \
+       EMAIL=$(git config user.email 2> /dev/null); then
+      echo "export GIT_AUTHOR_NAME=\"$NAME\"" >> "$CONFIG_FILE"
+      echo "export GIT_AUTHOR_EMAIL=\"$EMAIL\"" >> "$CONFIG_FILE"
+      echo 'export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME"' >> "$CONFIG_FILE"
+      echo 'export GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"' >> "$CONFIG_FILE"
+    fi
+
+    ${EDITOR:-vim} "$CONFIG_FILE"
+    USER_CONFIG=$(echo; cat "$CONFIG_FILE")
+    rm -f "$CONFIG_FILE"
+  fi
   MD5=$(get_md5 "$1")
   MD5=${MD5:0:8}
   TEMPLATE='#!/usr/bin/env bash
 # Created at: '$(date)'
-
+'"$USER_CONFIG"'
 set -u
 set -e
 
@@ -74,9 +100,9 @@ if [ -e ~/.vim -a "$(readlink ~/.vim)" = $BASE/.vim ]; then
   fi
 fi
 
-exit $STATUS
-# EOF #'
+exit $STATUS'
   echo "$TEMPLATE" > "$OUTPUT"
+  echo "# EOF #" >> "$OUTPUT"
   cat "$1" >> "$OUTPUT"
   chmod +x "$OUTPUT"
   echo "Created $OUTPUT executable"

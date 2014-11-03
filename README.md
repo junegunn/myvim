@@ -9,8 +9,12 @@ Usage
 `myvim` script will create an executable named `vim.$(whoami)`.
 
 ```sh
-curl -L https://raw.githubusercontent.com/junegunn/myvim/master/myvim | bash
+bash <(curl -L https://raw.githubusercontent.com/junegunn/myvim/master/myvim)
 ```
+
+### Options
+
+- `-e|--edit`
 
 Why?
 ----
