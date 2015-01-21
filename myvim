@@ -60,7 +60,7 @@ ren() {
 if [ ! -d $BASE/.vim ]; then
   >&2 echo "Extracting Vim environment to $BASE"
   mkdir -p $BASE
-  sed "1,/^# EOF #$/d" "$0" | tar -C $BASE -xj
+  sed "1,/^# EOF #$/d" "$0" | tar -C $BASE -xz
 fi
 
 mkdir -p $BASE/myvim-pids
@@ -117,8 +117,8 @@ if [ ! -e ~/.vim ]; then
   mkdir -p ~/.vim
 fi
 
-TEMP=/tmp/myvim.tbz
-tar -C ~ -h --exclude .git --exclude .hg --exclude .svn -cjf $TEMP .vim .vimrc
+TEMP=/tmp/myvim.tgz
+tar -C ~ -h --exclude .git --exclude .hg --exclude .svn -czf $TEMP .vim .vimrc
 generate $TEMP
 rm -f $TEMP
 
