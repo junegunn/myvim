@@ -31,15 +31,12 @@ How does it work?
 -----------------
 
 `myvim` creates a tar archive of your .vimrc and .vim directory and append it
-to a small bash script that temporarily swaps the existing .vim directory on
-the system with the one from the archive and starts Vim with your usual
-settings and plugins.
+to a small bash script that starts Vim with your usual settings and plugins.
 
-Limitation
-----------
+Caveat
+------
 
-Since the generated executable swaps `~/.vim` directory while running Vim, the
-other Vim processes can be affected as well. It would be ideal if we could
-avoid swapping it, but most Vim configurations in the wild are not written in
-a portable way and directly refer to the directory.
+The generated script injects code for temporarily swapping `$HOME` variable
+around the vimrc in the archive. This is because most vimrcs contain
+references to home directory (e.g. `call plug#begin('~/.vim/plugged')`).
 
