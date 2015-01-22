@@ -59,6 +59,7 @@ if [ ! -d $BASE/.vim ]; then
   (cd $BASE
    mv -f .vimrc .vimrc.org
    echo "let [s:home_org, \$HOME] = [\$HOME, \"$BASE\"]" > .vimrc
+   echo "set rtp+=$BASE/.vim" >> .vimrc
    cat .vimrc.org >> .vimrc
    rm -f .vimrc.org
    echo "let \$HOME = s:home_org" >> .vimrc)
