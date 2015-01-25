@@ -15,6 +15,8 @@ bash <(curl -L https://raw.githubusercontent.com/junegunn/myvim/master/myvim)
 ### Options
 
 - `-e|--edit`
+    - Allow you to edit the list of files to be archived and the environment
+      variables
 
 Why?
 ----
