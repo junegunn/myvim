@@ -5,15 +5,17 @@ set -u
 set -e
 
 EDIT=0
+COMPRESS=-z
 OUTPUT=vim.$(whoami)
 
 usage() {
-  echo "usage: $0 [-e|--edit] [output]"
+  echo "usage: $0 [-e|--edit] [-j] [output]"
 }
 
 while [ $# -gt 0 ]; do
   case $1 in
     -e|--edit) EDIT=1 ;;
+    -z|-j)     COMPRESS=$1 ;;
     -h|--help) usage; exit 0 ;;
     -*)        echo "$0: Unrecognized option $1"; exit 1 ;;
     *)         OUTPUT=$1 ;;
@@ -66,8 +68,8 @@ generate() {
     FILES=$(list)
   fi
 
-  TEMP=/tmp/myvim.tgz
-  tar -C ~ -h -czf $TEMP -T <(echo "$FILES")
+  TEMP=/tmp/myvim.tar.compressed
+  tar -C ~ -h $COMPRESS -cf $TEMP -T <(echo "$FILES")
 
   MD5=$(get_md5 "$TEMP")
   MD5=${MD5:0:8}
@@ -83,7 +85,7 @@ BASE=$MYVIM/'$MD5'
 if [ ! -d $BASE/.vim ]; then
   >&2 echo "Extracting Vim environment to $BASE"
   mkdir -p $BASE
-  sed "1,/^# EOF #$/d" "$0" | tar -C $BASE -xz
+  sed "1,/^# EOF #$/d" "$0" | tar -C $BASE -x '$COMPRESS'
   (cd $BASE
    mv -f .vimrc .vimrc.org
    echo "let [s:home_org, \$HOME] = [\$HOME, \"$BASE\"]" > .vimrc
