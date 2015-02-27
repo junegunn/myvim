@@ -16,7 +16,7 @@ bash <(curl -fL https://raw.githubusercontent.com/junegunn/myvim/master/myvim)
 
 - `-e|--edit`
     - Allow you to edit the list of files to be archived and the environment
-      variables
+      variables to apply
 - `-j`
     - Use bzip2 instead of gzip
 
