@@ -9,7 +9,7 @@ Usage
 `myvim` script will create an executable named `vim.$(whoami)`.
 
 ```sh
-bash <(curl -L https://raw.githubusercontent.com/junegunn/myvim/master/myvim)
+bash <(curl -fL https://raw.githubusercontent.com/junegunn/myvim/master/myvim)
 ```
 
 ### Options
