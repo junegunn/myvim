@@ -5,35 +5,23 @@ set -u
 set -e
 
 EDIT=0
+COMPRESS=-z
 OUTPUT=vim.$(whoami)
 
 usage() {
-  echo "usage: $0 [-e|--edit] [--gzip] [--bzip2] [--xz] [output]"
+  echo "usage: $0 [-e|--edit] [-j] [output]"
 }
-
-# Init the compression variables for set -u
-GZIP=0; # This is the default
-BZIP=0;
-XZ=0;
 
 while [ $# -gt 0 ]; do
   case $1 in
-    -e|--edit)      EDIT=1 ;;
-    --gzip)         GZIP=1 ; TAR_COMPRESS_CHAR=z ;;
-    --bzip|--bzip2) BZIP=1 ; TAR_COMPRESS_CHAR=j ;;
-    --xz)           XZ=1   ; TAR_COMPRESS_CHAR=J ;;
-    -h|--help)      usage; exit 0 ;;
-    -*)             echo "$0: Unrecognized option $1"; exit 1 ;;
-    *)              OUTPUT=$1 ;;
+    -e|--edit) EDIT=1 ;;
+    -z|-j)     COMPRESS=$1 ;;
+    -h|--help) usage; exit 0 ;;
+    -*)        echo "$0: Unrecognized option $1"; exit 1 ;;
+    *)         OUTPUT=$1 ;;
   esac
   shift
 done
-
-# Default to GZIP if nothing specified
-if [[ $GZIP -eq 0 && $BZIP -eq 0 && $XZ -eq 0 ]]; then
-    GZIP=1
-    TAR_COMPRESS_CHAR=z
-fi
 
 get_md5() {
   if which md5sum > /dev/null 2>&1; then
@@ -80,8 +68,8 @@ generate() {
     FILES=$(list)
   fi
 
-  TEMP=/tmp/myvim.tar.compress
-  tar -C ~ -h -$TAR_COMPRESS_CHAR -cf $TEMP -T <(echo "$FILES")
+  TEMP=/tmp/myvim.tar.compressed
+  tar -C ~ -h $COMPRESS -cf $TEMP -T <(echo "$FILES")
 
   MD5=$(get_md5 "$TEMP")
   MD5=${MD5:0:8}
@@ -97,7 +85,7 @@ BASE=$MYVIM/'$MD5'
 if [ ! -d $BASE/.vim ]; then
   >&2 echo "Extracting Vim environment to $BASE"
   mkdir -p $BASE
-  sed "1,/^# EOF #$/d" "$0" | tar -C $BASE -x'$TAR_COMPRESS_CHAR'
+  sed "1,/^# EOF #$/d" "$0" | tar -C $BASE -x '$COMPRESS'
   (cd $BASE
    mv -f .vimrc .vimrc.org
    echo "let [s:home_org, \$HOME] = [\$HOME, \"$BASE\"]" > .vimrc
@@ -112,18 +100,7 @@ exit $?
 # EOF #' > "$OUTPUT"
   cat "$TEMP" >> "$OUTPUT"
   chmod +x "$OUTPUT"
-
-  if [[ "$GZIP" -gt 0 ]]; then
-    compression_type=gzip
-  elif [[ "$BZIP" -gt 0 ]]; then
-    compression_type=bzip
-  elif [[ "$XZ" -gt 0 ]]; then
-    compression_type=xz
-  else
-	compression_type='not sure??'
-  fi
-
-  echo "Created $OUTPUT executable. Compressed using $compression_type"
+  echo "Created $OUTPUT executable"
   rm -f "$TEMP"
 }
 
