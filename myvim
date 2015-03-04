@@ -92,6 +92,7 @@ if [ ! -d $BASE/.vim ]; then
   echo "set rtp^=$BASE/.vim" >> .vimrc
   echo "autocmd VimEnter * let \$HOME = s:home_org" >> .vimrc
   cat .vimrc.org >> .vimrc
+  echo "let \$HOME = s:home_org" >> .vimrc
   rm -f .vimrc.org
 fi
 
