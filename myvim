@@ -68,7 +68,7 @@ generate() {
     FILES=$(list)
   fi
 
-  TEMP=/tmp/myvim.tar.compressed
+  TEMP=/tmp/myvim-$(whoami).tar.compressed
   tar -C ~ -h $COMPRESS -cf $TEMP -T <(echo "$FILES")
 
   MD5=$(get_md5 "$TEMP")
@@ -79,7 +79,7 @@ generate() {
 set -u
 set -e
 
-MYVIM=/tmp/myvim
+MYVIM=/tmp/myvim-$(whoami)
 BASE=$MYVIM/'$MD5'
 
 if [ ! -d $BASE/.vim ]; then
