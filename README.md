@@ -19,6 +19,8 @@ bash <(curl -fL https://raw.githubusercontent.com/junegunn/myvim/master/myvim)
       variables to apply
 - `-j`
     - Use bzip2 instead of gzip
+- `--exclude PATTERN`
+    - `grep -v` pattern for excluding files
 
 Why?
 ----

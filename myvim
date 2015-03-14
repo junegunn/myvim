@@ -7,15 +7,17 @@ set -e
 EDIT=0
 COMPRESS=-z
 OUTPUT=vim.$(whoami)
+GREPV="cat"
 
 usage() {
-  echo "usage: $0 [-e|--edit] [-j] [output]"
+  echo "usage: $0 [-e|--edit] [--exclude PATTERN] [-j] [output]"
 }
 
 while [ $# -gt 0 ]; do
   case $1 in
     -e|--edit) EDIT=1 ;;
     -z|-j)     COMPRESS=$1 ;;
+    --exclude) shift; GREPV="grep -v $(printf %q "$1")" ;;
     -h|--help) usage; exit 0 ;;
     -*)        echo "$0: Unrecognized option $1"; exit 1 ;;
     *)         OUTPUT=$1 ;;
@@ -35,7 +37,7 @@ list() {
   (cd ~ &&
    find -L .vim .vimrc \
    \( -name .git -o -name .hg -o -name .svn \) -prune \
-   -o ! -type d -print)
+   -o ! -type d -print) | eval "$GREPV"
 }
 
 gitenv() {
