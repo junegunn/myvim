@@ -88,14 +88,14 @@ if [ ! -d $BASE/.vim ]; then
   >&2 echo "Extracting Vim environment to $BASE"
   mkdir -p $BASE
   sed "1,/^# EOF #$/d" "$0" | tar -C $BASE -x '$COMPRESS'
-  cd $BASE
-  mv -f .vimrc .vimrc.org
-  echo "let [s:home_org, \$HOME] = [\$HOME, \"$BASE\"]" > .vimrc
-  echo "set rtp^=$BASE/.vim" >> .vimrc
-  echo "autocmd VimEnter * let \$HOME = s:home_org" >> .vimrc
-  cat .vimrc.org >> .vimrc
-  echo "let \$HOME = s:home_org" >> .vimrc
-  rm -f .vimrc.org
+  (cd $BASE
+   mv -f .vimrc .vimrc.org
+   echo "let [s:home_org, \$HOME] = [\$HOME, \"$BASE\"]" > .vimrc
+   echo "set rtp^=$BASE/.vim" >> .vimrc
+   echo "autocmd VimEnter * let \$HOME = s:home_org" >> .vimrc
+   cat .vimrc.org >> .vimrc
+   echo "let \$HOME = s:home_org" >> .vimrc
+   rm -f .vimrc.org)
 fi
 
 \vim -Nu $BASE/.vimrc "$@"
