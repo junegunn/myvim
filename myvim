@@ -8,6 +8,15 @@ EDIT=0
 COMPRESS=-z
 OUTPUT=vim.$(whoami)
 GREPV="cat"
+VIMRC=.vimrc
+if [ ! -e ~/$VIMRC ]; then
+  if [ -e ~/.vim/vimrc ]; then
+    VIMRC=.vim/vimrc
+  else
+    >&2 echo "~/.vimrc (or ~/.vim/vimrc) not found"
+    exit 1
+  fi
+fi
 
 usage() {
   echo "usage: $0 [-e|--edit] [--exclude PATTERN] [-j] [output]"
@@ -35,7 +44,7 @@ get_md5() {
 
 list() {
   (cd ~ &&
-   find -L .vim .vimrc \
+   find -L .vim $VIMRC \
    \( -name .git -o -name .hg -o -name .svn \) -prune \
    -o ! -type d -print) | eval "$GREPV"
 }
@@ -81,8 +90,8 @@ generate() {
 if [ "$1" == --hard ]; then
   HARD=1
   BASE=~
-  echo "** Overwriting ~/.vim and ~/.vimrc **"
-  for e in ~/.vim{,rc}; do
+  echo "** Overwriting ~/.vim and ~/'"$VIMRC"' **"
+  for e in ~/.vim ~/'"$VIMRC"'; do
     rm -rf ${e}.bak
     [ -e $e ] && mv ${e} ${e}.bak
   done
@@ -99,16 +108,16 @@ if [ ! -d $BASE/.vim ]; then
   mkdir -p $BASE
   sed "1,/^# EOF #$/d" "$0" | tar -C $BASE -x '$COMPRESS'
   [ -z "$HARD" ] && (cd $BASE
-   mv -f .vimrc .vimrc.org
-   echo "let [s:home_org, \$HOME] = [\$HOME, \"$BASE\"]" > .vimrc
-   echo "set rtp^=$BASE/.vim" >> .vimrc
-   echo "autocmd VimEnter * let \$HOME = s:home_org" >> .vimrc
-   cat .vimrc.org >> .vimrc
-   echo "let \$HOME = s:home_org" >> .vimrc
-   rm -f .vimrc.org)
+   mv -f '"$VIMRC"' '"$VIMRC"'.org
+   echo "let [s:home_org, \$HOME] = [\$HOME, \"$BASE\"]" > '"$VIMRC"'
+   echo "set rtp^=$BASE/.vim" >> '"$VIMRC"'
+   echo "autocmd VimEnter * let \$HOME = s:home_org" >> '"$VIMRC"'
+   cat '"$VIMRC"'.org >> '"$VIMRC"'
+   echo "let \$HOME = s:home_org" >> '"$VIMRC"'
+   rm -f '"$VIMRC"'.org)
 fi
 
-\vim -Nu $BASE/.vimrc "$@"
+\vim -Nu $BASE/'"$VIMRC"' "$@"
 exit $?
 # EOF #' > "$OUTPUT"
   cat "$TEMP" >> "$OUTPUT"
@@ -116,11 +125,6 @@ exit $?
   echo "Created $OUTPUT executable"
   rm -f "$TEMP"
 }
-
-if [ ! -e ~/.vimrc ]; then
-  >&2 echo "~/.vimrc is not found"
-  exit 1
-fi
 
 if [ ! -e ~/.vim ]; then
   mkdir -p ~/.vim
